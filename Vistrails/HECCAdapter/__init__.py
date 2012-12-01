@@ -145,8 +145,8 @@ def menu_items():
         remote_filename = vt_filepath.split('/')[-1]
         
         # login info
-        username = "clydeli"
-        password = "JiaRocks"
+        username = "username"
+        password = "password"
 
         # spawn the scp pexpect thread and login
         processID = -1
