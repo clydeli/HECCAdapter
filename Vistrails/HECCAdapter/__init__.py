@@ -10,10 +10,44 @@ import api
 import sys
 import pexpect
 import re
+import monitor
 
 version = "0.0.2"
 name = "HECCAdapter"
 identifier = "edu.cmu.nasaproject.vistrails.heccadapter"
+
+class UsageViewer(QtGui.QWidget):
+    """UsageViewer shows CPU usage, PBS job statuses, and Filesystem usage"""
+    
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.setWindowTitle('Usage Viewer')
+        gridLayout = QtGui.QGridLayout()
+        self.setLayout(gridLayout)
+
+        self.usage_label = QtGui.QLabel()
+        gridLayout.addWidget(self.usage_label, 1, 0)
+
+        self.cpuUsageButton = QtGui.QPushButton('CPU Usage')
+        gridLayout.addWidget(self.cpuUsageButton, 0, 0)
+        self.connect(self.cpuUsageButton, QtCore.SIGNAL('clicked()'), self.updateCpuView)
+
+        self.pbsUsageButton = QtGui.QPushButton('PBS Usage')
+        gridLayout.addWidget(self.pbsUsageButton, 0, 1)
+        self.connect(self.pbsUsageButton, QtCore.SIGNAL('clicked()'), self.updatePbsView)
+
+        self.filesystemUsageButton = QtGui.QPushButton('Filesystem Usage')
+        gridLayout.addWidget(self.filesystemUsageButton, 0, 2)
+        self.connect(self.filesystemUsageButton, QtCore.SIGNAL('clicked()'), self.updateFsView)
+
+    def updateCpuView(self):
+        self.usage_label.setText(monitor.get_cpu_use())
+
+    def updatePbsView(self):
+        self.usage_label.setText(monitor.get_pbs_jobs())
+
+    def updateFsView(self):
+        self.usage_label.setText(monitor.get_filesystem_usage())
 
 class HECCAdapter(Module):
     """HECCAdapter is an adapter to HECC"""
@@ -47,6 +81,10 @@ def initialize(*args, **keywords):
     basic = core.modules.basic_modules
     reg = core.modules.module_registry.registry
     reg.add_module(HECCAdapter)
+    
+    global usageWindow
+    usageWindow = UsageViewer()
+    usageWindow.show()
 
     #reg.add_input_port(HECCAdapter, "username", basic.String)
     #reg.add_input_port(HECCAdapter, "password", basic.String)
@@ -116,7 +154,13 @@ def menu_items():
         print >> sys.stderr," [scp Module] scp spawning line: (" + spawnLine + ")"
         thePrompt = pexpect.spawn( spawnLine )
         login( thePrompt, password )
-    
+
+    def view_usages():
+      usageWindow.show()
+      usageWindow.activateWindow()
+      usageWindow.raise_()
+
     lst = []
     lst.append(("Send to HECC", send_to_HECC))
+    lst.append(("View Usages", view_usages))
     return tuple(lst)
