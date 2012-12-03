@@ -134,12 +134,15 @@ if __name__ == '__main__':
         print >> sys.stderr, "Command line error: missing argument(s)."
         sys.exit(1)
 
+    def compose_path(path):
+        return path if os.path.isabs(path) else os.path.join(os.getcwd(), path)
+
     # Required arguments
-    queue_path = sys.argv[1]
-    config_path = sys.argv[2]
-    running_path = sys.argv[3]
-    done_path = sys.argv[4]
-    result_path = sys.argv[5]
+    queue_path = compose_path(sys.argv[1])
+    config_path = compose_path(sys.argv[2])
+    running_path = compose_path(sys.argv[3])
+    done_path = compose_path(sys.argv[4])
+    result_path = compose_path(sys.argv[5])
 
     # Blocks monitoring
     Scheduler(queue_path, config_path, running_path,
