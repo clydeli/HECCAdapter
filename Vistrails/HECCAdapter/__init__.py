@@ -118,8 +118,8 @@ class JobStatusViewer(QtGui.QWidget):
         login( thePrompt_running, password )
         login( thePrompt_done, password )
         in_queue_jobs = thePrompt_queue.before.replace("/home/hecc/job_queue/", "")
-        running_jobs = thePrompt_running.before.replace("/home/hecc/job_running/", "")
-        done_jobs = thePrompt_done.before.replace("/home/hecc/job_done/", "")
+        running_jobs = thePrompt_running.before.replace("/home/hecc/running/", "")
+        done_jobs = thePrompt_done.before.replace("/home/hecc/done/", "")
 
         self.usage_label.setText("In Queue: "+in_queue_jobs+"\nRunning: "+running_jobs+"\nDone: "+done_jobs)
 
