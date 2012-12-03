@@ -49,6 +49,33 @@ class UsageViewer(QtGui.QWidget):
     def updateFsView(self):
         self.usage_label.setText(monitor.get_filesystem_usage())
 
+class LoginViewer(QtGui.QWidget):
+
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.setWindowTitle('Login Viewer')
+        gridLayout = QtGui.QGridLayout()
+        self.setLayout(gridLayout)
+
+        self.usernameLabel = QtGui.QLabel('User Name')
+        gridLayout.addWidget(self.usernameLabel, 0, 0)
+        self.usernameEdit = QtGui.QLineEdit()
+        gridLayout.addWidget(self.usernameEdit, 0, 1)
+
+        self.passwordLabel = QtGui.QLabel('Password')
+        gridLayout.addWidget(self.passwordLabel, 1, 0)
+        self.passwordEdit = QtGui.QLineEdit()
+        self.passwordEdit.setEchoMode(QtGui.QLineEdit.Password)
+        gridLayout.addWidget(self.passwordEdit, 1, 1)
+
+        self.loginButton = QtGui.QPushButton('Login')
+        gridLayout.addWidget(self.loginButton, 2, 1)
+        self.connect(self.loginButton, QtCore.SIGNAL('clicked()'), self.save)
+
+    def save(self):
+        self.username = str(self.usernameEdit.text())
+        self.password = str(self.passwordEdit.text())
+
 class HECCAdapter(Module):
     """HECCAdapter is an adapter to HECC"""
 
@@ -85,6 +112,10 @@ def initialize(*args, **keywords):
     global usageWindow
     usageWindow = UsageViewer()
     usageWindow.show()
+
+    global loginWindow
+    loginWindow = LoginViewer()
+    loginWindow.show()
 
     #reg.add_input_port(HECCAdapter, "username", basic.String)
     #reg.add_input_port(HECCAdapter, "password", basic.String)
@@ -145,8 +176,8 @@ def menu_items():
         remote_filename = vt_filepath.split('/')[-1]
         
         # login info
-        username = "username"
-        password = "password"
+        username = loginWindow.username
+        password = loginWindow.password
 
         # spawn the scp pexpect thread and login
         processID = -1
@@ -160,7 +191,13 @@ def menu_items():
       usageWindow.activateWindow()
       usageWindow.raise_()
 
+    def log_on_HECC():
+        loginWindow.show()
+        loginWindow.activateWindow()
+        loginWindow.raise_()
+
     lst = []
+    lst.append(("Log on HECC", log_on_HECC))
     lst.append(("Send to HECC", send_to_HECC))
     lst.append(("View Usages", view_usages))
     return tuple(lst)
