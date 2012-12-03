@@ -50,7 +50,6 @@ class UsageViewer(QtGui.QWidget):
     def updateFsView(self):
         self.usage_label.setText(monitor.get_filesystem_usage())
 
-
 class JobStatusViewer(QtGui.QWidget):
 
     def __init__(self, parent=None):
@@ -105,7 +104,7 @@ class JobStatusViewer(QtGui.QWidget):
         # login info
         username = "username"
         password = "password"
-
+        
         # spawn the scp pexpect thread and login
         spawnLine_queue = "ssh " + username + "@ok.freya.cc \"" + "find /home/hecc/job_queue -type f | grep '/"+username+"_'" + "\""
         spawnLine_running = "ssh " + username + "@ok.freya.cc \"" + "find /home/hecc/running -type f | grep '/"+username+"_'" + "\""
@@ -124,6 +123,33 @@ class JobStatusViewer(QtGui.QWidget):
         self.usage_label.setText("In Queue: "+in_queue_jobs+"\nRunning: "+running_jobs+"\nDone: "+done_jobs)
 
 
+class LoginViewer(QtGui.QWidget):
+
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+        self.setWindowTitle('Login Viewer')
+        gridLayout = QtGui.QGridLayout()
+        self.setLayout(gridLayout)
+
+        self.usernameLabel = QtGui.QLabel('User Name')
+        gridLayout.addWidget(self.usernameLabel, 0, 0)
+        self.usernameEdit = QtGui.QLineEdit()
+        gridLayout.addWidget(self.usernameEdit, 0, 1)
+
+        self.passwordLabel = QtGui.QLabel('Password')
+        gridLayout.addWidget(self.passwordLabel, 1, 0)
+        self.passwordEdit = QtGui.QLineEdit()
+        self.passwordEdit.setEchoMode(QtGui.QLineEdit.Password)
+        gridLayout.addWidget(self.passwordEdit, 1, 1)
+
+        self.loginButton = QtGui.QPushButton('Login')
+        gridLayout.addWidget(self.loginButton, 2, 1)
+        self.connect(self.loginButton, QtCore.SIGNAL('clicked()'), self.save)
+
+    def save(self):
+        self.username = str(self.usernameEdit.text())
+        self.password = str(self.passwordEdit.text())
+        self.hide()
 
 class HECCAdapter(Module):
     """HECCAdapter is an adapter to HECC"""
@@ -156,15 +182,10 @@ def initialize(*args, **keywords):
     reg = core.modules.module_registry.registry
     reg.add_module(HECCAdapter)
     
-    #reg.add_input_port(HECCAdapter, "username", basic.String)
-    #reg.add_input_port(HECCAdapter, "password", basic.String)
-    #reg.add_input_port(HECCAdapter, "vt_filepath", basic.String)
-    #reg.add_input_port(HECCAdapter, "remote_filename", basic.String)
-    #reg.add_output_port(HECCAdapter, "complete flag", basic.Boolean)
-
-    global usageWindow, jobstatusWindow
+    global loginWindow, usageWindow, jobstatusWindow
+    loginWindow = LoginViewer()
     usageWindow = UsageViewer()
-    jobstatusWindow = JobStatusViewer()
+    #jobstatusWindow = JobStatusViewer()
 
     #usageWindow.show()
 
@@ -219,8 +240,8 @@ def menu_items():
         workflow_name = api.get_available_versions()[1][api.get_available_versions()[0][-1]]
         
         # login info
-        username = "username"
-        password = "password"
+        username = loginWindow.username
+        password = loginWindow.password
 
         vt_filepath = api.get_current_controller().get_locator().name
         remote_filename = username + "_" + str(uuid.uuid4()) + "_" + vt_filepath.split('/')[-1][:-3]
@@ -246,8 +267,13 @@ def menu_items():
       jobstatusWindow.activateWindow()
       jobstatusWindow.raise_()
 
+    def log_on_HECC():
+        loginWindow.show()
+        loginWindow.activateWindow()
+        loginWindow.raise_()
 
     lst = []
+    lst.append(("Log on HECC", log_on_HECC))
     lst.append(("Send to HECC", send_to_HECC))
     lst.append(("View HECC Usages", view_usages))
     lst.append(("View Job Status", view_jobstatus))
