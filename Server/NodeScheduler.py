@@ -57,41 +57,41 @@ class NodeScheduler:
     num_available_nodes = int(self.node_monitor.node_stat[node_type['model']+'_available'])  
     model = node_type['model']
     ncpus = node_type['ncpus']
-    available_nodes = []
-    while(num_req_cpus>0 or num_available_nodes>0):
+    reserved_nodes = []
+    while(num_req_cpus>0 and num_available_nodes>0):
       if num_req_cpus < ncpus:
         num_select = num_req_cpus 
       else:
         num_select = ncpus
       num_req_cpus -= num_select
       num_available_nodes -= 1
-      available_nodes += [{'model':model, 'ncpus':ncpus, 'select':num_select}]
-    return (available_nodes, num_req_cpus)
+      reserved_nodes += [{'model':model, 'ncpus':ncpus, 'select':num_select}]
+    return (reserved_nodes, num_req_cpus)
 
   def schedule(self, mode, num_req_cpus):
     self.node_monitor.fetch_node_stat()
-    total_nodes = []
+    total_reserved_nodes = []
     if mode == 'fastest':
       for t in self.node_types:
-        print "!!!!" + str(num_req_cpus)
         if num_req_cpus <= 0:
           break
-        available_nodes, num_req_cpus = self.reserve(t, num_req_cpus)
-        total_nodes += available_nodes
+        reserved_nodes, num_req_cpus = self.reserve(t, num_req_cpus)
+        total_reserved_nodes += reserved_nodes
     elif mode == 'cheapest':
       for t in reversed(self.node_types):
         if num_req_cpus <= 0:
           break
-        available_nodes, num_req_cpus = self.reserve(t, num_req_cpus)
-        total_nodes.append(available_nodes)
+        reserved_nodes, num_req_cpus = self.reserve(t, num_req_cpus)
+        total_reserved_nodes += reserved_nodes
     else:
       return None
 
     if num_req_cpus <= 0:
-      return total_nodes
+      return total_reserved_nodes
     else:
       return None
 
 if __name__ == "__main__":
   scheduler = NodeScheduler()
-  print scheduler.schedule('fastest', 16)
+  scheduler.schedule('fastest', 38)
+  scheduler.schedule('cheapest', 16)
