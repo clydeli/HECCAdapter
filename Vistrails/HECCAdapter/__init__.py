@@ -4,53 +4,22 @@ import core.modules.basic_modules
 import core.modules.module_registry
 import core.system
 import gui.application
-from PyQt4 import QtCore, QtGui
+
+from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from PyQt4.QtWebKit import *
 
 import api
 import sys
 import pexpect
 import re
-import monitor
 import uuid
 import time
 
-version = "0.0.3"
+version = "0.0.5"
 name = "HECCAdapter"
 identifier = "edu.cmu.nasaproject.vistrails.heccadapter"
-
-class UsageViewer(QtGui.QWidget):
-    """UsageViewer shows CPU usage, PBS job statuses, and Filesystem usage"""
-    
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.setWindowTitle('Usage Viewer')
-        gridLayout = QtGui.QGridLayout()
-        self.setLayout(gridLayout)
-
-        self.usage_label = QtGui.QLabel()
-        gridLayout.addWidget(self.usage_label, 1, 0)
-
-        self.cpuUsageButton = QtGui.QPushButton('CPU Usage')
-        gridLayout.addWidget(self.cpuUsageButton, 0, 0)
-        self.connect(self.cpuUsageButton, QtCore.SIGNAL('clicked()'), self.updateCpuView)
-
-        self.pbsUsageButton = QtGui.QPushButton('PBS Usage')
-        gridLayout.addWidget(self.pbsUsageButton, 0, 1)
-        self.connect(self.pbsUsageButton, QtCore.SIGNAL('clicked()'), self.updatePbsView)
-
-        self.filesystemUsageButton = QtGui.QPushButton('Filesystem Usage')
-        gridLayout.addWidget(self.filesystemUsageButton, 0, 2)
-        self.connect(self.filesystemUsageButton, QtCore.SIGNAL('clicked()'), self.updateFsView)
-
-    def updateCpuView(self):
-        self.usage_label.setText(monitor.get_cpu_use())
-
-    def updatePbsView(self):
-        self.usage_label.setText(monitor.get_pbs_jobs())
-
-    def updateFsView(self):
-        self.usage_label.setText(monitor.get_filesystem_usage())
-
 
 class JobStatusViewer(QtGui.QWidget):
 
@@ -347,12 +316,12 @@ def initialize(*args, **keywords):
     reg = core.modules.module_registry.registry
     reg.add_module(HECCAdapter)
     
-    global loginWindow, usageWindow, jobstatusWindow, rsaWindow, sendWindow
+    global loginWindow, jobstatusWindow, rsaWindow, sendWindow, webWindow
     loginWindow = LoginViewer()
-    usageWindow = UsageViewer()
     jobstatusWindow = JobStatusViewer()
     rsaWindow = RSAViewer()
     sendWindow = SendViewer()
+    webWindow = QWebView()
 
 ###################
 
@@ -362,6 +331,27 @@ def menu_items():
         usageWindow.show()
         usageWindow.activateWindow()
         usageWindow.raise_()
+
+    def view_cpu_usage():
+        webWindow.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel1.html"))
+        webWindow.resize(350,540)
+        webWindow.show()
+        webWindow.activateWindow()
+        webWindow.raise_()
+
+    def view_pbs_status():
+        webWindow.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel2.html"))
+        webWindow.resize(280,380)
+        webWindow.show()
+        webWindow.activateWindow()
+        webWindow.raise_()
+
+    def view_filesystem_usage():
+        webWindow.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel3.html"))
+        webWindow.resize(320,450)
+        webWindow.show()
+        webWindow.activateWindow()
+        webWindow.raise_()
 
     def view_jobstatus():
         jobstatusWindow.show()
@@ -382,6 +372,8 @@ def menu_items():
     lst = []
     lst.append(("Log on HECC", log_on_HECC))
     lst.append(("Send to HECC", send_to_HECC))
-    lst.append(("View HECC Usages", view_usages))
+    lst.append(("View CPU Usage", view_cpu_usage))
+    lst.append(("View PBS Status", view_pbs_status))
+    lst.append(("View File System Status", view_filesystem_usage))
     lst.append(("View Job Status", view_jobstatus))
     return tuple(lst)
