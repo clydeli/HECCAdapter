@@ -302,7 +302,7 @@ class SendViewer(QtGui.QWidget):
         config_text += "\\n    select: "+str(self.selectEdit.text())
         #print >> sys.stderr, config_text
 
-        spawnLine_cfg = "ssh " + username + "@ok.freya.cc \"" + "echo -ne '"+config_text+"' >> /home/hecc/config/"+remote_filename+".cfg" + "\""
+        spawnLine_cfg = "ssh " + username + "@ok.freya.cc \"" + "echo -ne '"+config_text+"' >> /home/hecc/config/"+remote_filename+".yml" + "\""
         #print >> sys.stderr, spawnLine_cfg
         thePrompt_cfg = pexpect.spawn( spawnLine_cfg )
         login( thePrompt_cfg, password )
