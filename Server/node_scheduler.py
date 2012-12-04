@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import urllib
 from sgmllib import SGMLParser
 
@@ -57,16 +59,13 @@ class NodeScheduler:
     num_available_nodes = int(self.node_monitor.node_stat[node_type['model']+'_available'])  
     model = node_type['model']
     ncpus = node_type['ncpus']
-    reserved_nodes = []
+    select = 0
     while(num_req_cpus>0 and num_available_nodes>0):
-      if num_req_cpus < ncpus:
-        num_select = num_req_cpus 
-      else:
-        num_select = ncpus
-      num_req_cpus -= num_select
+      num_req_cpus -= ncpus
       num_available_nodes -= 1
-      reserved_nodes += [{'model':model, 'ncpus':ncpus, 'select':num_select}]
-    return (reserved_nodes, num_req_cpus)
+      select += 1
+    reserved_node = [{'model':model, 'ncpus':ncpus, 'select':select}]
+    return (reserved_node, num_req_cpus)
 
   def schedule(self, mode, num_req_cpus):
     self.node_monitor.fetch_node_stat()
@@ -75,14 +74,14 @@ class NodeScheduler:
       for t in self.node_types:
         if num_req_cpus <= 0:
           break
-        reserved_nodes, num_req_cpus = self.reserve(t, num_req_cpus)
-        total_reserved_nodes += reserved_nodes
+        reserved_node, num_req_cpus = self.reserve(t, num_req_cpus)
+        total_reserved_nodes += reserved_node
     elif mode == 'cheapest':
       for t in reversed(self.node_types):
         if num_req_cpus <= 0:
           break
-        reserved_nodes, num_req_cpus = self.reserve(t, num_req_cpus)
-        total_reserved_nodes += reserved_nodes
+        reserved_node, num_req_cpus = self.reserve(t, num_req_cpus)
+        total_reserved_nodes += reserved_node
     else:
       return None
 
@@ -93,5 +92,5 @@ class NodeScheduler:
 
 if __name__ == "__main__":
   scheduler = NodeScheduler()
-  scheduler.schedule('fastest', 38)
-  scheduler.schedule('cheapest', 16)
+  print scheduler.schedule('fastest', 5000)
+  print scheduler.schedule('cheapest', 17)
