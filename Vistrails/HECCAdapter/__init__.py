@@ -268,6 +268,7 @@ def menu_items():
     def view_cpu_usage():
       web = QWebView()
       web.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel1.html"))
+      web.resize(350,540)
       web.show()
       web.activeWindow()
       web.raise_()
@@ -275,6 +276,7 @@ def menu_items():
     def view_pbs_status():
       web = QWebView()
       web.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel2.html"))
+      web.resize(280,380)
       web.show()
       web.activeWindow()
       web.raise_()
@@ -282,6 +284,7 @@ def menu_items():
     def view_filesystem_usage():
       web = QWebView()
       web.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel3.html"))
+      web.resize(320,450)
       web.show()
       web.activeWindow()
       web.raise_()
