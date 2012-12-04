@@ -10,6 +10,8 @@ import subprocess
 import sys
 import yaml
 
+from node_scheduler import NodeScheduler
+
 #
 # Limitations:
 #   * Config files have to be copied to the config folder before project files
@@ -47,8 +49,11 @@ class Scheduler:
             self.running_project = self.project_name(filename)
 
             project_name, _ = os.path.splitext(filename)
-            config_filepath = os.path.join(self.paths['config'], project_name + ".yml")
-            self.user_config = yaml.load(open(config_filepath, 'r'))
+            user_config_filepath = os.path.join(self.paths['config'], project_name + ".yml")
+            user_config = yaml.load(open(user_config_filepath, 'r'))
+            pbs_config_filepath = os.path.join(self.paths['config'], project_name + ".pbs")
+
+            self.generate_pbs_config(user_config, pbs_config_filepath)
 
             running_filepath = os.path.join(self.paths['running'], filename)
 
@@ -67,11 +72,11 @@ class Scheduler:
                                         self.project_name(filename) + '.txt')
             Scheduler.log('Project: ' + self.result_filepath)
 
-            Scheduler.log('Workflow: ' + self.user_config['workflow_name'])
+            Scheduler.log('Workflow: ' + user_config['workflow_name'])
 
             # Run VisTrails
             cmd_args = [SETTING['vistrails']['script_path'],
-                        running_filepath, self.user_config['workflow_name'],
+                        running_filepath, user_config['workflow_name'],
                         SETTING['vistrails']['output_path']]
             Scheduler.log(' '.join(cmd_args))
             subprocess.call(cmd_args)
@@ -113,6 +118,32 @@ class Scheduler:
 
         def project_name(self, vistrails_project_filename):
             return os.path.splitext(vistrails_project_filename)[0]
+
+        def generate_pbs_config(self, user_config, pbs_config_filepath):
+            scheduling_policy = user_config['scheduling']['type']
+            Scheduler.log('Scheduling policy: ' + scheduling_policy)
+
+            scheduler = NodeScheduler()
+
+            if scheduling_policy == 'manual':
+                pbs_config = {'model': user_config['scheduling']['node'],
+                              'select': user_config['scheduling']['select'],
+                              'ncpus': user_config['scheduling']['ncpus']}
+            else:
+                pbs_config = scheduler.schedule(user_config['scheduling']['type'],
+                                                user_config['scheduling']['ncpus'])
+
+            Scheduler.log('PBS config: ' + str(pbs_config))
+
+            try:
+                f = open(pbs_config_filepath, "w")
+                try:
+                    f.write('#PBS -l select=%d:ncpus=%d:model=%s\n' % (
+                                pbs_config['select'], pbs_config['ncpus'], pbs_config['model']))
+                finally:
+                    f.close()
+            except IOError:
+                pass
 
         def send_notification(self, vistrails_project_name, url):
             to = 'owen.chu@sv.cmu.edu'
