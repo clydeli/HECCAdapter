@@ -5,3 +5,5 @@ done/
 job_queue/
 results/
 running/
+
+setting.yml
