@@ -4,7 +4,10 @@ import core.modules.basic_modules
 import core.modules.module_registry
 import core.system
 import gui.application
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from PyQt4.QtWebKit import *
 
 import api
 import sys
@@ -43,7 +46,7 @@ class UsageViewer(QtGui.QWidget):
 
     def updateCpuView(self):
         self.usage_label.setText(monitor.get_cpu_use())
-
+       
     def updatePbsView(self):
         self.usage_label.setText(monitor.get_pbs_jobs())
 
@@ -262,6 +265,27 @@ def menu_items():
       usageWindow.activateWindow()
       usageWindow.raise_()
 
+    def view_cpu_usage():
+      web = QWebView()
+      web.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel1.html"))
+      web.show()
+      web.activeWindow()
+      web.raise_()
+
+    def view_pbs_status():
+      web = QWebView()
+      web.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel2.html"))
+      web.show()
+      web.activeWindow()
+      web.raise_()
+
+    def view_filesystem_usage():
+      web = QWebView()
+      web.load(QUrl("http://www.nas.nasa.gov/monitoring/hud/realtime/pleiadespanel3.html"))
+      web.show()
+      web.activeWindow()
+      web.raise_()
+
     def view_jobstatus():
       jobstatusWindow.show()
       jobstatusWindow.activateWindow()
@@ -275,6 +299,8 @@ def menu_items():
     lst = []
     lst.append(("Log on HECC", log_on_HECC))
     lst.append(("Send to HECC", send_to_HECC))
-    lst.append(("View HECC Usages", view_usages))
+    lst.append(("View CPU Usage", view_cpu_usage))
+    lst.append(("View PBS Status", view_pbs_status))
+    lst.append(("View File System Status", view_filesystem_usage))
     lst.append(("View Job Status", view_jobstatus))
     return tuple(lst)
