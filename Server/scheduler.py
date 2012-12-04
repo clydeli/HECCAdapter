@@ -46,6 +46,10 @@ class Scheduler:
             _, filename = os.path.split(job_path)
             self.running_project = self.project_name(filename)
 
+            project_name, _ = os.path.splitext(filename)
+            config_filepath = os.path.join(self.paths['config'], project_name + ".yml")
+            self.user_config = yaml.load(open(config_filepath, 'r'))
+
             running_filepath = os.path.join(self.paths['running'], filename)
 
             # Remove old project file with the same name
@@ -63,12 +67,11 @@ class Scheduler:
                                         self.project_name(filename) + '.txt')
             Scheduler.log('Project: ' + self.result_filepath)
 
-            workflow = self.workflow_for(filename)
-            Scheduler.log('Workflow: ' + workflow)
+            Scheduler.log('Workflow: ' + self.user_config['workflow_name'])
 
             # Run VisTrails
             cmd_args = [SETTING['vistrails']['script_path'],
-                        running_filepath, workflow,
+                        running_filepath, self.user_config['workflow_name'],
                         SETTING['vistrails']['output_path']]
             Scheduler.log(' '.join(cmd_args))
             subprocess.call(cmd_args)
@@ -107,24 +110,6 @@ class Scheduler:
                         f.close()
                 except IOError:
                     pass
-
-        def workflow_for(self, vistrails_project_filename):
-            filename, extention = os.path.splitext(vistrails_project_filename)
-            config_filepath = os.path.join(self.paths['config'], filename + ".cfg")
-            workflow = ''
-
-            try:
-                f = open(config_filepath, "r")
-                try:
-                    tokens = f.readline().strip().split('=')
-                    if (tokens[0] == 'workflow_name'):
-                        workflow = tokens[1]
-                finally:
-                    f.close()
-            except IOError:
-                pass
-
-            return workflow
 
         def project_name(self, vistrails_project_filename):
             return os.path.splitext(vistrails_project_filename)[0]
