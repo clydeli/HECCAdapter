@@ -50,10 +50,10 @@ class Scheduler:
 
             project_name, _ = os.path.splitext(filename)
             user_config_filepath = os.path.join(self.paths['config'], project_name + ".yml")
-            user_config = yaml.load(open(user_config_filepath, 'r'))
+            self.user_config = yaml.load(open(user_config_filepath, 'r'))
             pbs_config_filepath = os.path.join(self.paths['config'], project_name + ".pbs")
 
-            self.generate_pbs_config(user_config, pbs_config_filepath)
+            self.generate_pbs_config(self.user_config, pbs_config_filepath)
 
             running_filepath = os.path.join(self.paths['running'], filename)
 
@@ -72,11 +72,11 @@ class Scheduler:
                                         self.project_name(filename) + '.txt')
             Scheduler.log('Project: ' + self.result_filepath)
 
-            Scheduler.log('Workflow: ' + user_config['workflow_name'])
+            Scheduler.log('Workflow: ' + self.user_config['workflow_name'])
 
             # Run VisTrails
             cmd_args = [SETTING['vistrails']['script_path'],
-                        running_filepath, user_config['workflow_name'],
+                        running_filepath, self.user_config['workflow_name'],
                         SETTING['vistrails']['output_path']]
             Scheduler.log(' '.join(cmd_args))
             subprocess.call(cmd_args)
@@ -146,10 +146,9 @@ class Scheduler:
                 pass
 
         def send_notification(self, vistrails_project_name, url):
-            to = 'owen.chu@sv.cmu.edu'
             body = string.join((
                     'From: %s' % SETTING['notification']['sender'],
-                    'To: %s' % to,
+                    'To: %s' % self.user_config['email'],
                     'Subject: [HECC] Your compute job was completed',
                     '',
                     'Your compute job "%s" was completed.' % vistrails_project_name,
@@ -163,7 +162,7 @@ class Scheduler:
             server.starttls()
             server.login(SETTING['notification']['sender'],
                          SETTING['notification']['sender_password'])
-            server.sendmail(SETTING['notification']['sender'], [to], body)
+            server.sendmail(SETTING['notification']['sender'], [self.user_config['email']], body)
             server.quit()
 
 
