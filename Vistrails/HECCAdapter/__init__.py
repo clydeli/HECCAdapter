@@ -177,11 +177,13 @@ class SendViewer(QtGui.QWidget):
         self.emailEdit = QtGui.QLineEdit()
         gridLayout.addWidget(self.emailEdit, 0, 1)
 
+        """
         self.ncpusLabel = QtGui.QLabel('Number of CPUs')
         gridLayout.addWidget(self.ncpusLabel, 1, 0)
         self.ncpusEdit = QtGui.QLineEdit()
         self.ncpusEdit.setText("32")
         gridLayout.addWidget(self.ncpusEdit, 1, 1)
+        """
 
         self.prefLabel = QtGui.QLabel('Preference')
         gridLayout.addWidget(self.prefLabel, 2, 0)
@@ -190,7 +192,9 @@ class SendViewer(QtGui.QWidget):
         self.prefCombo.addItem("Cost", "cost")
         self.prefCombo.addItem("Manual", "manual")
         gridLayout.addWidget(self.prefCombo, 2, 1)
+        self.connect(self.prefCombo, QtCore.SIGNAL('currentIndexChanged(QString)'), self.changeNodeInputs)
 
+        """
         self.nodeLabel = QtGui.QLabel('Node Type')
         gridLayout.addWidget(self.nodeLabel, 3, 0)
         self.nodeCombo = QtGui.QComboBox()
@@ -205,12 +209,60 @@ class SendViewer(QtGui.QWidget):
         self.selectEdit = QtGui.QLineEdit()
         self.selectEdit.setText("2")
         gridLayout.addWidget(self.selectEdit, 4, 1)
+        """
 
+        # Sandy bridge input
+        self.sanLabel = QtGui.QLabel('Sandy Bridge')
+        gridLayout.addWidget(self.sanLabel, 3, 0)
+        self.sanEdit = QtGui.QLineEdit()
+        self.sanEdit.setText("4")
+        gridLayout.addWidget(self.sanEdit, 3, 1)
+
+        # Sandy bridge input
+        self.wesLabel = QtGui.QLabel('Westmere')
+        gridLayout.addWidget(self.wesLabel, 4, 0)
+        self.wesEdit = QtGui.QLineEdit()
+        self.wesEdit.setText("0")
+        gridLayout.addWidget(self.wesEdit, 4, 1)
+
+        # Sandy bridge input
+        self.nehLabel = QtGui.QLabel('Nehalem')
+        gridLayout.addWidget(self.nehLabel, 5, 0)
+        self.nehEdit = QtGui.QLineEdit()
+        self.nehEdit.setText("0")
+        gridLayout.addWidget(self.nehEdit, 5, 1)
+
+        # Sandy bridge input
+        self.harLabel = QtGui.QLabel('Harpertown')
+        gridLayout.addWidget(self.harLabel, 6, 0)
+        self.harEdit = QtGui.QLineEdit()
+        self.harEdit.setText("0")
+        gridLayout.addWidget(self.harEdit, 6, 1)
 
         self.sendButton = QtGui.QPushButton('Send to HECC')
-        gridLayout.addWidget(self.sendButton, 5, 1)
+        gridLayout.addWidget(self.sendButton, 8, 1)
         self.connect(self.sendButton, QtCore.SIGNAL('clicked()'), self.send)
 
+    def changeNodeInputs(self):
+      # preference = self.prefCombo.currentText()
+      preference = self.prefCombo.itemData(self.prefCombo.currentIndex()).toString()
+      print >> sys.stderr, preference
+
+      if preference == "performance":
+        self.sanEdit.setText("4")
+        self.wesEdit.setText("0")
+        self.nehEdit.setText("0")
+        self.harEdit.setText("0")
+      elif preference == "cost":
+        self.sanEdit.setText("0")
+        self.wesEdit.setText("0")
+        self.nehEdit.setText("0")
+        self.harEdit.setText("4")
+      elif preference == "manual":
+        self.sanEdit.setText("0")
+        self.wesEdit.setText("0")
+        self.nehEdit.setText("0")
+        self.harEdit.setText("0")
 
     def send(self):
     
@@ -266,9 +318,11 @@ class SendViewer(QtGui.QWidget):
         # spawn the scp pexpect thread and login
         config_text = "email: "+str(self.emailEdit.text())+"\\nworkflow_name: "+str(workflow_name)+"\\nscheduling: "
         config_text += "\\n    type: "+str(self.prefCombo.itemData(self.prefCombo.currentIndex()).toString())
+        """
         config_text += "\\n    ncpus: "+str(self.ncpusEdit.text())
         config_text += "\\n    node: "+str(self.nodeCombo.itemData(self.nodeCombo.currentIndex()).toString())
         config_text += "\\n    select: "+str(self.selectEdit.text())
+        """
         #print >> sys.stderr, config_text
 
         spawnLine_cfg = "ssh " + username + "@ok.freya.cc \"" + "echo -ne '"+config_text+"' >> /home/hecc/config/"+remote_filename+".yml" + "\""
@@ -282,8 +336,6 @@ class SendViewer(QtGui.QWidget):
         login( thePrompt, password )
 
         self.hide()
-    
-
 
 class HECCAdapter(Module):
     """HECCAdapter is an adapter to HECC"""
@@ -354,6 +406,14 @@ def menu_items():
         webWindow.raise_()
 
     def view_jobstatus():
+        rsaWindow.generate_rsa()
+        rsaWindow.show()
+        rsaWindow.activateWindow()
+        rsaWindow.raise_()
+
+        time.sleep(3)
+        rsaWindow.hide()
+
         jobstatusWindow.show()
         jobstatusWindow.activateWindow()
         jobstatusWindow.raise_()
@@ -365,6 +425,14 @@ def menu_items():
         loginWindow.raise_()
 
     def send_to_HECC():
+        rsaWindow.generate_rsa()
+        rsaWindow.show()
+        rsaWindow.activateWindow()
+        rsaWindow.raise_()
+
+        time.sleep(3)
+        rsaWindow.hide()
+
         sendWindow.show()
         sendWindow.activateWindow()
         sendWindow.raise_()
