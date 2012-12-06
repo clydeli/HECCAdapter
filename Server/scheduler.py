@@ -53,7 +53,7 @@ class Scheduler:
             self.user_config = yaml.load(open(user_config_filepath, 'r'))
             pbs_config_filepath = os.path.join(self.paths['config'], project_name + ".pbs")
 
-            self.generate_pbs_config(self.user_config, pbs_config_filepath)
+            #self.generate_pbs_config(self.user_config, pbs_config_filepath)
 
             running_filepath = os.path.join(self.paths['running'], filename)
 
