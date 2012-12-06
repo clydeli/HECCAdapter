@@ -222,21 +222,21 @@ class SendViewer(QtGui.QWidget):
         self.wesLabel = QtGui.QLabel('Westmere')
         gridLayout.addWidget(self.wesLabel, 4, 0)
         self.wesEdit = QtGui.QLineEdit()
-        self.wesEdit.setText("0")
+        self.wesEdit.setText("2")
         gridLayout.addWidget(self.wesEdit, 4, 1)
 
         # Sandy bridge input
         self.nehLabel = QtGui.QLabel('Nehalem')
         gridLayout.addWidget(self.nehLabel, 5, 0)
         self.nehEdit = QtGui.QLineEdit()
-        self.nehEdit.setText("0")
+        self.nehEdit.setText("1")
         gridLayout.addWidget(self.nehEdit, 5, 1)
 
         # Sandy bridge input
         self.harLabel = QtGui.QLabel('Harpertown')
         gridLayout.addWidget(self.harLabel, 6, 0)
         self.harEdit = QtGui.QLineEdit()
-        self.harEdit.setText("0")
+        self.harEdit.setText("1")
         gridLayout.addWidget(self.harEdit, 6, 1)
 
         self.sendButton = QtGui.QPushButton('Send to HECC')
@@ -250,13 +250,13 @@ class SendViewer(QtGui.QWidget):
 
       if preference == "performance":
         self.sanEdit.setText("4")
-        self.wesEdit.setText("0")
-        self.nehEdit.setText("0")
-        self.harEdit.setText("0")
+        self.wesEdit.setText("2")
+        self.nehEdit.setText("1")
+        self.harEdit.setText("1")
       elif preference == "cost":
-        self.sanEdit.setText("0")
-        self.wesEdit.setText("0")
-        self.nehEdit.setText("0")
+        self.sanEdit.setText("1")
+        self.wesEdit.setText("1")
+        self.nehEdit.setText("2")
         self.harEdit.setText("4")
       elif preference == "manual":
         self.sanEdit.setText("0")
