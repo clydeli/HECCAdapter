@@ -18,8 +18,8 @@ import uuid
 import time
 
 version = "0.0.5"
-name = "HECCAdapter"
-identifier = "edu.cmu.nasaproject.vistrails.heccadapter"
+name = "AmazonPlugin"
+identifier = "edu.cmu.nasaproject.vistrails.amazonplugin"
 
 class JobStatusViewer(QtGui.QWidget):
 
@@ -129,46 +129,13 @@ class LoginViewer(QtGui.QWidget):
     def save(self):
         self.username = str(self.usernameEdit.text())
         self.password = str(self.passwordEdit.text())
-
-        # stupid simulation
-        time.sleep(3)
-        rsaWindow.generate_rsa()
-        rsaWindow.show()
-        rsaWindow.activateWindow()
-        rsaWindow.raise_()
-
         self.hide()
-
-
-class RSAViewer(QtGui.QWidget):
-
-    def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
-        self.setWindowTitle('RSA Token Input')
-        gridLayout = QtGui.QGridLayout()
-        self.setLayout(gridLayout)
-
-        self.rsaLabel = QtGui.QLabel('Input RSA Token')
-        gridLayout.addWidget(self.rsaLabel, 0, 0)
-        self.rsaEdit = QtGui.QLineEdit()
-        gridLayout.addWidget(self.rsaEdit, 1, 0)
-
-        self.okButton = QtGui.QPushButton('OK')
-        gridLayout.addWidget(self.okButton, 2, 0)
-        self.connect(self.okButton, QtCore.SIGNAL('clicked()'), self.check)
-
-    def generate_rsa(self):
-        self.rsaEdit.setText(str(uuid.uuid4())[0:8])
-
-    def check(self):
-        self.hide()
-
 
 class SendViewer(QtGui.QWidget):
 
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
-        self.setWindowTitle('Send to HECC Settings')
+        self.setWindowTitle('Send to Amazon Settings')
         gridLayout = QtGui.QGridLayout()
         self.setLayout(gridLayout)
 
@@ -239,7 +206,7 @@ class SendViewer(QtGui.QWidget):
         self.harEdit.setText("1")
         gridLayout.addWidget(self.harEdit, 6, 1)
 
-        self.sendButton = QtGui.QPushButton('Send to HECC')
+        self.sendButton = QtGui.QPushButton('Send to Amazon')
         gridLayout.addWidget(self.sendButton, 8, 1)
         self.connect(self.sendButton, QtCore.SIGNAL('clicked()'), self.send)
 
@@ -337,8 +304,8 @@ class SendViewer(QtGui.QWidget):
 
         self.hide()
 
-class HECCAdapter(Module):
-    """HECCAdapter is an adapter to HECC"""
+class AmazonPlugin(Module):
+    """AmazonPlugin is an adapter to Amazon"""
 
     def __init__( self ):
         Module.__init__(self)
@@ -366,12 +333,11 @@ def initialize(*args, **keywords):
     # we can refer to it in a shorter way.
     basic = core.modules.basic_modules
     reg = core.modules.module_registry.registry
-    reg.add_module(HECCAdapter)
+    reg.add_module(AmazonPlugin)
     
-    global loginWindow, jobstatusWindow, rsaWindow, sendWindow, webWindow
+    global loginWindow, jobstatusWindow, sendWindow, webWindow
     loginWindow = LoginViewer()
     jobstatusWindow = JobStatusViewer()
-    rsaWindow = RSAViewer()
     sendWindow = SendViewer()
     webWindow = QWebView()
 
@@ -406,40 +372,24 @@ def menu_items():
         webWindow.raise_()
 
     def view_jobstatus():
-        rsaWindow.generate_rsa()
-        rsaWindow.show()
-        rsaWindow.activateWindow()
-        rsaWindow.raise_()
-
-        time.sleep(3)
-        rsaWindow.hide()
-
         jobstatusWindow.show()
         jobstatusWindow.activateWindow()
         jobstatusWindow.raise_()
         jobstatusWindow.updateStatus()
 
-    def log_on_HECC():
+    def log_on_Amazon():
         loginWindow.show()
         loginWindow.activateWindow()
         loginWindow.raise_()
 
-    def send_to_HECC():
-        rsaWindow.generate_rsa()
-        rsaWindow.show()
-        rsaWindow.activateWindow()
-        rsaWindow.raise_()
-
-        time.sleep(3)
-        rsaWindow.hide()
-
+    def send_to_Amazon():
         sendWindow.show()
         sendWindow.activateWindow()
         sendWindow.raise_()
 
     lst = []
-    lst.append(("Log on HECC", log_on_HECC))
-    lst.append(("Send to HECC", send_to_HECC))
+    lst.append(("Log on Amazon", log_on_Amazon))
+    lst.append(("Send to Amazon", send_to_Amazon))
     lst.append(("View CPU Usage", view_cpu_usage))
     lst.append(("View PBS Status", view_pbs_status))
     lst.append(("View File System Status", view_filesystem_usage))
